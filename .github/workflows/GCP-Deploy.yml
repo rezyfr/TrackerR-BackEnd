@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  dbhost: ${{secrets.DB_HOST}}
+  dbport: ${{secrets.DB_PORT}}
+
 jobs:
 
     deploy:

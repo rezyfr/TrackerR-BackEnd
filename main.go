@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -43,6 +44,27 @@ func postUsers(c *gin.Context) {
 }
 
 func main() {
+	host, errEnv := os.LookupEnv("dbhost")
+	log.Println(host, errEnv)
+
+	dbport, errEnv := os.LookupEnv("dbport")
+	log.Println(host, errEnv)
+
+	const (
+		user     = "postgres"
+		password = "MXUb%$JV}AL-,2[j"
+		dbname   = "postgres"
+		sslmode  = "disable"
+	)
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", host, dbport, user, password, dbname, sslmode)
+
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
 	router := gin.Default()
 	router.GET("/users", getUsers)
 	router.GET("/users/:email", getUserByEmail)
