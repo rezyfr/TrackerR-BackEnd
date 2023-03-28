@@ -12,7 +12,7 @@ import (
 func createRandomWallet(t *testing.T) Wallet {
 	arg := CreateWalletParams{
 		UserID:  util.NullInt(1),
-		Balance: util.RandomAmount(),
+		Balance: 100000,
 		Icon:    util.RandomString(5),
 		Name:    util.RandomString(5),
 	}

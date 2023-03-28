@@ -8,6 +8,10 @@ INSERT INTO wallet (
   $1, $2, $3, $4
 ) RETURNING *;
 
+-- name: GetWalletForUpdate :one
+SELECT * FROM wallet
+WHERE id = $1 FOR NO KEY UPDATE;
+
 -- name: GetWallet :one
 SELECT * FROM wallet
 WHERE id = $1 LIMIT 1;
@@ -23,6 +27,12 @@ UPDATE wallet SET
   balance = $2,
   icon = $3
 WHERE id = $4
+RETURNING *;
+
+-- name: AddWalletBalance :one
+UPDATE wallet SET
+  balance = balance + sqlc.arg(amount)
+WHERE id = sqlc.arg(id)
 RETURNING *;
 
 -- name: DeleteWallet :exec

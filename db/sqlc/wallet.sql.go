@@ -10,6 +10,33 @@ import (
 	"database/sql"
 )
 
+const addWalletBalance = `-- name: AddWalletBalance :one
+UPDATE wallet SET
+  balance = balance + $1
+WHERE id = $2
+RETURNING id, user_id, name, balance, icon, created_at, updated_at
+`
+
+type AddWalletBalanceParams struct {
+	Amount int64 `json:"amount"`
+	ID     int64 `json:"id"`
+}
+
+func (q *Queries) AddWalletBalance(ctx context.Context, arg AddWalletBalanceParams) (Wallet, error) {
+	row := q.db.QueryRowContext(ctx, addWalletBalance, arg.Amount, arg.ID)
+	var i Wallet
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Balance,
+		&i.Icon,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createWallet = `-- name: CreateWallet :one
 INSERT INTO wallet (
   user_id, 
@@ -65,6 +92,26 @@ WHERE id = $1 LIMIT 1
 
 func (q *Queries) GetWallet(ctx context.Context, id int64) (Wallet, error) {
 	row := q.db.QueryRowContext(ctx, getWallet, id)
+	var i Wallet
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Balance,
+		&i.Icon,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getWalletForUpdate = `-- name: GetWalletForUpdate :one
+SELECT id, user_id, name, balance, icon, created_at, updated_at FROM wallet
+WHERE id = $1 FOR NO KEY UPDATE
+`
+
+func (q *Queries) GetWalletForUpdate(ctx context.Context, id int64) (Wallet, error) {
+	row := q.db.QueryRowContext(ctx, getWalletForUpdate, id)
 	var i Wallet
 	err := row.Scan(
 		&i.ID,
