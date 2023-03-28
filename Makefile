@@ -1,10 +1,10 @@
 postgres:
-	docker run --name postgres12 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres:12-alpine
+	docker run --name postgres15 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres:15
 createdb:
-	docker exec -it postgres12 createdb --username=root --owner=root trackerr
+	docker exec -it postgres15 createdb --username=root --owner=root trackerr
 
 dropdb:
-	docker exec -it postgres12 dropdb trackerr
+	docker exec -it postgres15 dropdb trackerr
 
 migrateup:
 	migrate -path db/migration -database "postgresql://root:postgres@localhost:5432/trackerr?sslmode=disable" -verbose up
