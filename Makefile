@@ -11,4 +11,11 @@ migrateup:
 
 migratedown: 
 	migrate -path db/migration -database "postgresql://root:postgres@localhost:5432/trackerr?sslmode=disable" -verbose down
-.PHONY: postgres createdb dropdb migrateup migratedown
+
+sqlc:
+	sqlc generate	
+
+test:
+	go test -v -cover ./...
+	
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test

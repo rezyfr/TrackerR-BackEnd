@@ -15,7 +15,8 @@ CREATE TABLE "transactions" (
   "id" bigserial PRIMARY KEY,
   "user_id" bigint,
   "amount" bigint NOT NULL,
-  "create_at" timestamptz DEFAULT (now()),
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "updated_at" timestamptz NOT NULL DEFAULT (now()),
   "type" transactiontype NOT NULL,
   "category_id" bigint NOT NULL,
   "wallet_id" bigint
@@ -26,7 +27,9 @@ CREATE TABLE "category" (
   "user_id" bigint,
   "name" varchar NOT NULL,
   "type" transactiontype NOT NULL,
-  "icon" varchar NOT NULL
+  "icon" varchar NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "updated_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "wallet" (
@@ -34,12 +37,14 @@ CREATE TABLE "wallet" (
   "user_id" bigint,
   "name" varchar NOT NULL,
   "balance" bigint NOT NULL,
-  "icon" varchar NOT NULL
+  "icon" varchar NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "updated_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE INDEX ON "users" ("full_name");
 
-CREATE INDEX ON "transactions" ("user_id", "category_id", "type");
+CREATE INDEX ON "transactions" ("user_id", "category_id", "type", "updated_at");
 
 CREATE INDEX ON "category" ("user_id");
 
