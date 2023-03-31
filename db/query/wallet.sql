@@ -35,6 +35,12 @@ UPDATE wallet SET
 WHERE id = sqlc.arg(id)
 RETURNING *;
 
+-- name: UpdateWalletBalance :one
+UPDATE wallet SET
+  balance = sqlc.arg(amount)
+WHERE id = sqlc.arg(id)
+RETURNING *;
+
 -- name: DeleteWallet :exec
 DELETE FROM wallet
 WHERE id = $1;

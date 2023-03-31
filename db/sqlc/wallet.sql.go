@@ -197,3 +197,30 @@ func (q *Queries) UpdateWallet(ctx context.Context, arg UpdateWalletParams) (Wal
 	)
 	return i, err
 }
+
+const updateWalletBalance = `-- name: UpdateWalletBalance :one
+UPDATE wallet SET
+  balance = $1
+WHERE id = $2
+RETURNING id, user_id, name, balance, icon, created_at, updated_at
+`
+
+type UpdateWalletBalanceParams struct {
+	Amount int64 `json:"amount"`
+	ID     int64 `json:"id"`
+}
+
+func (q *Queries) UpdateWalletBalance(ctx context.Context, arg UpdateWalletBalanceParams) (Wallet, error) {
+	row := q.db.QueryRowContext(ctx, updateWalletBalance, arg.Amount, arg.ID)
+	var i Wallet
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Balance,
+		&i.Icon,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

@@ -58,3 +58,28 @@ func TestNewTransactionTx(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, wallet1.Balance-int64(n*int(amount)), updatedWallet.Balance)
 }
+
+func TestUpdateWalletTx(t *testing.T) {
+	store := NewStore(testDB)
+	wallet := createRandomWallet(t)
+
+	ctx := context.Background()
+	result, err := store.UpdateWalletTx(ctx, UpdateWalletTxParams{
+		ID:     wallet.ID,
+		Amount: 20000,
+	})
+
+	if result.Transaction.Type == TransactiontypeDEBIT {
+		result.Transaction.Amount = -result.Transaction.Amount
+	}
+	require.NoError(t, err)
+	require.NotEmpty(t, result)
+
+	require.Equal(t, result.Wallet.Balance, wallet.Balance+result.Transaction.Amount)
+}
+
+/**
+* current = 100000
+* updated = 35000
+* transaction = 65000
+**/

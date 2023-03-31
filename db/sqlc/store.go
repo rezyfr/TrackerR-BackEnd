@@ -3,7 +3,9 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"math"
 
 	"github.com/rezyfr/Trackerr-BackEnd/util"
 )
@@ -68,9 +70,6 @@ func (store *Store) CreateTransactionTx(ctx context.Context, arg NewTransactionT
 		if err != nil {
 			return err
 		}
-		if err != nil {
-			return err
-		}
 		result.Category, err = q.GetCategory(ctx, arg.CategoryID)
 		if err != nil {
 			return err
@@ -83,6 +82,56 @@ func (store *Store) CreateTransactionTx(ctx context.Context, arg NewTransactionT
 		result.Wallet, err = q.AddWalletBalance(ctx, AddWalletBalanceParams{
 			ID:     arg.WalletID,
 			Amount: arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return result, err
+}
+
+type UpdateWalletTxParams struct {
+	ID     int64 `json:"id"`
+	Amount int64 `json:"amount"`
+}
+
+type UpdateWalletTxResult struct {
+	Wallet      Wallet      `json:"wallet"`
+	Transaction Transaction `json:"transaction"`
+}
+
+func (store *Store) UpdateWalletTx(ctx context.Context, arg UpdateWalletTxParams) (UpdateWalletTxResult, error) {
+	var result UpdateWalletTxResult
+	err := store.execTx(ctx, func(q *Queries) error {
+		var err error
+		currentWallet, err := q.GetWallet(ctx, arg.ID)
+		if err != nil {
+			return err
+		}
+		if currentWallet.Balance == arg.Amount {
+			return errors.New("balance is the same")
+		}
+		result.Wallet, err = q.UpdateWalletBalance(ctx, UpdateWalletBalanceParams{
+			ID:     arg.ID,
+			Amount: arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+		transactionAmount := currentWallet.Balance - result.Wallet.Balance
+		transactionType := TransactiontypeDEBIT
+
+		if transactionAmount < 0 {
+			transactionType = TransactiontypeCREDIT
+		}
+
+		result.Transaction, err = q.CreateTransaction(ctx, CreateTransactionParams{
+			Amount:     int64(math.Abs(float64(transactionAmount))),
+			Type:       transactionType,
+			UserID:     currentWallet.UserID,
+			WalletID:   util.NullInt(int(arg.ID)),
+			CategoryID: 1,
 		})
 		if err != nil {
 			return err
