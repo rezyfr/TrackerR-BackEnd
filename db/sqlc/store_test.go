@@ -77,9 +77,3 @@ func TestUpdateWalletTx(t *testing.T) {
 
 	require.Equal(t, result.Wallet.Balance, wallet.Balance+result.Transaction.Amount)
 }
-
-/**
-* current = 100000
-* updated = 35000
-* transaction = 65000
-**/
