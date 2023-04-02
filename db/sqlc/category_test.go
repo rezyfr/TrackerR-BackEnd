@@ -10,8 +10,13 @@ import (
 )
 
 func createRandomCategory(t *testing.T) Category {
+	user, err := testQueries.CreateUser(context.Background(), CreateUserParams{
+		Email:    util.RandomEmail(),
+		FullName: util.RandomString(5),
+	})
+	require.NoError(t, err)
 	arg := CreateCategoryParams{
-		UserID: util.NullInt(1),
+		UserID: util.NullInt(int(user.ID)),
 		Type:   Transactiontype(util.RandomType()),
 		Icon:   util.RandomString(5),
 		Name:   util.RandomString(5),
@@ -30,8 +35,13 @@ func createRandomCategory(t *testing.T) Category {
 }
 
 func TestCreateCategory(t *testing.T) {
+	user, err := testQueries.CreateUser(context.Background(), CreateUserParams{
+		Email:    util.RandomEmail(),
+		FullName: util.RandomString(5),
+	})
+	require.NoError(t, err)
 	arg := CreateCategoryParams{
-		UserID: util.NullInt(1),
+		UserID: util.NullInt(int(user.ID)),
 		Type:   Transactiontype(util.RandomType()),
 		Icon:   util.RandomString(5),
 	}

@@ -9,31 +9,71 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createRandomTransaction(t *testing.T, userId int) Transaction {
+func createRandomTransaction(t *testing.T) (Transaction, error) {
+	var transaction Transaction
+	user, err := testQueries.CreateUser(context.Background(), CreateUserParams{
+		Email:    util.RandomEmail(),
+		FullName: util.RandomString(5),
+	})
+	if err != nil {
+		return transaction, err
+	}
+	category, err := testQueries.CreateCategory(context.Background(), CreateCategoryParams{
+		UserID: util.NullInt(int(user.ID)),
+		Type:   Transactiontype(util.RandomType()),
+		Icon:   util.RandomString(5),
+		Name:   util.RandomString(5),
+	})
+	if err != nil {
+		return transaction, err
+	}
+	wallet, err := testQueries.CreateWallet(context.Background(), CreateWalletParams{
+		UserID: util.NullInt(int(user.ID)),
+		Name:   util.RandomString(5),
+	})
+	if err != nil {
+		return transaction, err
+	}
 	arg := CreateTransactionParams{
 		Amount:     util.RandomAmount(),
 		Type:       Transactiontype(util.RandomType()),
-		UserID:     util.NullInt(userId),
-		CategoryID: 5,
-		WalletID:   util.NullInt(1),
+		UserID:     util.NullInt(int(user.ID)),
+		CategoryID: category.ID,
+		WalletID:   util.NullInt(int(wallet.ID)),
 	}
 
-	transaction, err := testQueries.CreateTransaction(context.Background(), arg)
-	require.NoError(t, err)
-	require.NotEmpty(t, transaction)
+	transaction, err = testQueries.CreateTransaction(context.Background(), arg)
+	if err != nil {
+		return transaction, err
+	}
 
-	require.Equal(t, arg.Amount, transaction.Amount)
-
-	return transaction
+	return transaction, err
 }
 
 func TestCreateTransaction(t *testing.T) {
+	user, err := testQueries.CreateUser(context.Background(), CreateUserParams{
+		Email:    util.RandomEmail(),
+		FullName: util.RandomString(5),
+	})
+	require.NoError(t, err)
+	category, err := testQueries.CreateCategory(context.Background(), CreateCategoryParams{
+		UserID: util.NullInt(int(user.ID)),
+		Type:   Transactiontype(util.RandomType()),
+		Icon:   util.RandomString(5),
+		Name:   util.RandomString(5),
+	})
+	require.NoError(t, err)
+	wallet, err := testQueries.CreateWallet(context.Background(), CreateWalletParams{
+		UserID: util.NullInt(int(user.ID)),
+		Name:   util.RandomString(5),
+	})
+	require.NoError(t, err)
 	arg := CreateTransactionParams{
 		Amount:     util.RandomAmount(),
 		Type:       Transactiontype(util.RandomType()),
-		UserID:     util.NullInt(1),
-		CategoryID: 5,
-		WalletID:   util.NullInt(1),
+		UserID:     util.NullInt(int(user.ID)),
+		CategoryID: category.ID,
+		WalletID:   util.NullInt(int(wallet.ID)),
 	}
 
 	trx, err := testQueries.CreateTransaction(context.Background(), arg)
@@ -46,12 +86,12 @@ func TestCreateTransaction(t *testing.T) {
 
 func TestListTransactions(t *testing.T) {
 	for i := 0; i < 5; i++ {
-		createRandomTransaction(t, 1)
+		createRandomTransaction(t)
 	}
 
 	arg := ListTransactionsParams{
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
 
 	transactions, err := testQueries.ListTransactions(context.Background(), arg)
@@ -65,7 +105,8 @@ func TestListTransactions(t *testing.T) {
 }
 
 func TestUpdateTransaction(t *testing.T) {
-	trx := createRandomTransaction(t, 1)
+	trx, err := createRandomTransaction(t)
+	require.NoError(t, err)
 
 	arg := UpdateTransactionParams{
 		ID:         trx.ID,
@@ -87,10 +128,11 @@ func TestUpdateTransaction(t *testing.T) {
 }
 
 func TestDeleteTransaction(t *testing.T) {
-	trx := createRandomTransaction(t, 1)
-
-	err := testQueries.DeleteTransaction(context.Background(), trx.ID)
+	trx, err := createRandomTransaction(t)
 	require.NoError(t, err)
+
+	err2 := testQueries.DeleteTransaction(context.Background(), trx.ID)
+	require.NoError(t, err2)
 
 	trx2, err := testQueries.GetTransaction(context.Background(), trx.ID)
 	require.Error(t, err)

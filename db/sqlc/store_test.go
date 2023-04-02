@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/rezyfr/Trackerr-BackEnd/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -12,8 +13,22 @@ func TestNewTransactionTx(t *testing.T) {
 
 	user1 := createRandomUser(t)
 
-	wallet1 := createRandomWallet(t)
+	wallet1, err := testQueries.CreateWallet(context.Background(), CreateWalletParams{
+		UserID:  util.NullInt(int(user1.ID)),
+		Balance: 100000,
+		Icon:    util.RandomString(5),
+		Name:    util.RandomString(5),
+	})
+	require.NoError(t, err)
 
+	category, err := testQueries.CreateCategory(context.Background(), CreateCategoryParams{
+		UserID: util.NullInt(int(user1.ID)),
+		Type:   Transactiontype(util.RandomType()),
+		Icon:   util.RandomString(5),
+		Name:   util.RandomString(5),
+	})
+
+	require.NoError(t, err)
 	// run n concurrent new transaction
 	n := 5
 	amount := int64(10000)
@@ -28,7 +43,7 @@ func TestNewTransactionTx(t *testing.T) {
 				Amount:     amount,
 				Type:       TransactiontypeDEBIT,
 				UserID:     user1.ID,
-				CategoryID: 5,
+				CategoryID: category.ID,
 				WalletID:   wallet1.ID,
 			})
 			errs <- err
