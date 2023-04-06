@@ -14,7 +14,7 @@ func TestNewTransactionTx(t *testing.T) {
 	user1 := createRandomUser(t)
 
 	wallet1, err := testQueries.CreateWallet(context.Background(), CreateWalletParams{
-		UserID:  util.NullInt(int(user1.ID)),
+		UserID:  user1.ID,
 		Balance: 100000,
 		Icon:    util.RandomString(5),
 		Name:    util.RandomString(5),
@@ -22,7 +22,7 @@ func TestNewTransactionTx(t *testing.T) {
 	require.NoError(t, err)
 
 	category, err := testQueries.CreateCategory(context.Background(), CreateCategoryParams{
-		UserID: util.NullInt(int(user1.ID)),
+		UserID: user1.ID,
 		Type:   Transactiontype(util.RandomType()),
 		Icon:   util.RandomString(5),
 		Name:   util.RandomString(5),
@@ -63,7 +63,7 @@ func TestNewTransactionTx(t *testing.T) {
 		trx := result.Transaction
 		require.Equal(t, amount, trx.Amount)
 		require.Equal(t, wallet1.ID, result.Wallet.ID)
-		require.Equal(t, user1.ID, trx.UserID.Int64)
+		require.Equal(t, user1.ID, trx.UserID)
 		require.NotZero(t, trx.ID)
 		require.NotZero(t, trx.CreatedAt)
 	}

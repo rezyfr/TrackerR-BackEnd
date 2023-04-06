@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const addWalletBalance = `-- name: AddWalletBalance :one
@@ -49,10 +48,10 @@ INSERT INTO wallet (
 `
 
 type CreateWalletParams struct {
-	UserID  sql.NullInt64 `json:"user_id"`
-	Name    string        `json:"name"`
-	Balance int64         `json:"balance"`
-	Icon    string        `json:"icon"`
+	UserID  int64  `json:"user_id"`
+	Name    string `json:"name"`
+	Balance int64  `json:"balance"`
+	Icon    string `json:"icon"`
 }
 
 func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) (Wallet, error) {
@@ -131,13 +130,13 @@ WHERE user_id = $1
 ORDER BY name
 `
 
-func (q *Queries) ListWallets(ctx context.Context, userID sql.NullInt64) ([]Wallet, error) {
+func (q *Queries) ListWallets(ctx context.Context, userID int64) ([]Wallet, error) {
 	rows, err := q.db.QueryContext(ctx, listWallets, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Wallet
+	items := []Wallet{}
 	for rows.Next() {
 		var i Wallet
 		if err := rows.Scan(

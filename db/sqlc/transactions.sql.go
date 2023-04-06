@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createTransaction = `-- name: CreateTransaction :one
@@ -23,11 +22,11 @@ INSERT INTO transactions (
 `
 
 type CreateTransactionParams struct {
-	UserID     sql.NullInt64   `json:"user_id"`
+	UserID     int64           `json:"user_id"`
 	Amount     int64           `json:"amount"`
 	Type       Transactiontype `json:"type"`
 	CategoryID int64           `json:"category_id"`
-	WalletID   sql.NullInt64   `json:"wallet_id"`
+	WalletID   int64           `json:"wallet_id"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
@@ -84,23 +83,25 @@ func (q *Queries) GetTransaction(ctx context.Context, id int64) (Transaction, er
 }
 
 const listTransactions = `-- name: ListTransactions :many
-SELECT id, user_id, amount, created_at, updated_at, type, category_id, wallet_id FROM transactions
+SELECT id, user_id, amount, created_at, updated_at, type, category_id, wallet_id FROM transactions 
+WHERE user_id = $1
 ORDER BY created_at
-LIMIT $1 OFFSET $2
+LIMIT $2 OFFSET $3
 `
 
 type ListTransactionsParams struct {
+	UserID int64 `json:"user_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListTransactions(ctx context.Context, arg ListTransactionsParams) ([]Transaction, error) {
-	rows, err := q.db.QueryContext(ctx, listTransactions, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listTransactions, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Transaction
+	items := []Transaction{}
 	for rows.Next() {
 		var i Transaction
 		if err := rows.Scan(
@@ -140,7 +141,7 @@ type UpdateTransactionParams struct {
 	Amount     int64           `json:"amount"`
 	Type       Transactiontype `json:"type"`
 	CategoryID int64           `json:"category_id"`
-	WalletID   sql.NullInt64   `json:"wallet_id"`
+	WalletID   int64           `json:"wallet_id"`
 	ID         int64           `json:"id"`
 }
 

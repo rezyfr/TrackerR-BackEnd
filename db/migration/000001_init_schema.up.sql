@@ -13,18 +13,18 @@ CREATE TABLE "users" (
 
 CREATE TABLE "transactions" (
   "id" bigserial PRIMARY KEY,
-  "user_id" bigint,
+  "user_id" bigint NOT NULL,
   "amount" bigint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
   "type" transactiontype NOT NULL,
   "category_id" bigint NOT NULL,
-  "wallet_id" bigint
+  "wallet_id" bigint NOT NULL
 );
 
 CREATE TABLE "category" (
   "id" bigserial PRIMARY KEY,
-  "user_id" bigint,
+  "user_id" bigint NOT NULL,
   "name" varchar NOT NULL,
   "type" transactiontype NOT NULL,
   "icon" varchar NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE "category" (
 
 CREATE TABLE "wallet" (
   "id" bigserial PRIMARY KEY,
-  "user_id" bigint,
+  "user_id" bigint NOT NULL,
   "name" varchar NOT NULL,
   "balance" bigint NOT NULL,
   "icon" varchar NOT NULL,

@@ -16,7 +16,7 @@ func createRandomCategory(t *testing.T) Category {
 	})
 	require.NoError(t, err)
 	arg := CreateCategoryParams{
-		UserID: util.NullInt(int(user.ID)),
+		UserID: user.ID,
 		Type:   Transactiontype(util.RandomType()),
 		Icon:   util.RandomString(5),
 		Name:   util.RandomString(5),
@@ -41,7 +41,7 @@ func TestCreateCategory(t *testing.T) {
 	})
 	require.NoError(t, err)
 	arg := CreateCategoryParams{
-		UserID: util.NullInt(int(user.ID)),
+		UserID: user.ID,
 		Type:   Transactiontype(util.RandomType()),
 		Icon:   util.RandomString(5),
 	}
@@ -56,13 +56,12 @@ func TestCreateCategory(t *testing.T) {
 }
 
 func TestListCategories(t *testing.T) {
+	var cat Category
 	for i := 0; i < 3; i++ {
-		createRandomCategory(t)
+		cat = createRandomCategory(t)
 	}
 
-	arg := util.NullInt(1)
-
-	categorys, err := testQueries.ListCategories(context.Background(), arg)
+	categorys, err := testQueries.ListCategories(context.Background(), cat.UserID)
 	require.NoError(t, err)
 	require.NotEmpty(t, categorys)
 

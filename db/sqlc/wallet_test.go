@@ -11,7 +11,7 @@ import (
 
 func createRandomWallet(t *testing.T) Wallet {
 	arg := CreateWalletParams{
-		UserID:  util.NullInt(1),
+		UserID:  1,
 		Balance: 100000,
 		Icon:    util.RandomString(5),
 		Name:    util.RandomString(5),
@@ -31,7 +31,7 @@ func createRandomWallet(t *testing.T) Wallet {
 
 func TestCreateWallet(t *testing.T) {
 	arg := CreateWalletParams{
-		UserID:  util.NullInt(1),
+		UserID:  1,
 		Balance: util.RandomAmount(),
 		Icon:    util.RandomString(5),
 	}
@@ -46,13 +46,12 @@ func TestCreateWallet(t *testing.T) {
 }
 
 func TestListWallets(t *testing.T) {
+	var wallet Wallet
 	for i := 0; i < 3; i++ {
-		createRandomWallet(t)
+		wallet = createRandomWallet(t)
 	}
 
-	arg := util.NullInt(1)
-
-	wallets, err := testQueries.ListWallets(context.Background(), arg)
+	wallets, err := testQueries.ListWallets(context.Background(), wallet.UserID)
 	require.NoError(t, err)
 	require.NotEmpty(t, wallets)
 

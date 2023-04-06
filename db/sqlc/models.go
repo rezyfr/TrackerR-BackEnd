@@ -5,7 +5,6 @@
 package db
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
@@ -56,7 +55,7 @@ func (ns NullTransactiontype) Value() (driver.Value, error) {
 
 type Category struct {
 	ID        int64           `json:"id"`
-	UserID    sql.NullInt64   `json:"user_id"`
+	UserID    int64           `json:"user_id"`
 	Name      string          `json:"name"`
 	Type      Transactiontype `json:"type"`
 	Icon      string          `json:"icon"`
@@ -66,13 +65,13 @@ type Category struct {
 
 type Transaction struct {
 	ID         int64           `json:"id"`
-	UserID     sql.NullInt64   `json:"user_id"`
+	UserID     int64           `json:"user_id"`
 	Amount     int64           `json:"amount"`
 	CreatedAt  time.Time       `json:"created_at"`
 	UpdatedAt  time.Time       `json:"updated_at"`
 	Type       Transactiontype `json:"type"`
 	CategoryID int64           `json:"category_id"`
-	WalletID   sql.NullInt64   `json:"wallet_id"`
+	WalletID   int64           `json:"wallet_id"`
 }
 
 type User struct {
@@ -83,11 +82,11 @@ type User struct {
 }
 
 type Wallet struct {
-	ID        int64         `json:"id"`
-	UserID    sql.NullInt64 `json:"user_id"`
-	Name      string        `json:"name"`
-	Balance   int64         `json:"balance"`
-	Icon      string        `json:"icon"`
-	CreatedAt time.Time     `json:"created_at"`
-	UpdatedAt time.Time     `json:"updated_at"`
+	ID        int64     `json:"id"`
+	UserID    int64     `json:"user_id"`
+	Name      string    `json:"name"`
+	Balance   int64     `json:"balance"`
+	Icon      string    `json:"icon"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

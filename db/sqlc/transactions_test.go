@@ -19,7 +19,7 @@ func createRandomTransaction(t *testing.T) (Transaction, error) {
 		return transaction, err
 	}
 	category, err := testQueries.CreateCategory(context.Background(), CreateCategoryParams{
-		UserID: util.NullInt(int(user.ID)),
+		UserID: user.ID,
 		Type:   Transactiontype(util.RandomType()),
 		Icon:   util.RandomString(5),
 		Name:   util.RandomString(5),
@@ -28,7 +28,7 @@ func createRandomTransaction(t *testing.T) (Transaction, error) {
 		return transaction, err
 	}
 	wallet, err := testQueries.CreateWallet(context.Background(), CreateWalletParams{
-		UserID: util.NullInt(int(user.ID)),
+		UserID: user.ID,
 		Name:   util.RandomString(5),
 	})
 	if err != nil {
@@ -37,9 +37,43 @@ func createRandomTransaction(t *testing.T) (Transaction, error) {
 	arg := CreateTransactionParams{
 		Amount:     util.RandomAmount(),
 		Type:       Transactiontype(util.RandomType()),
-		UserID:     util.NullInt(int(user.ID)),
+		UserID:     user.ID,
 		CategoryID: category.ID,
-		WalletID:   util.NullInt(int(wallet.ID)),
+		WalletID:   wallet.ID,
+	}
+
+	transaction, err = testQueries.CreateTransaction(context.Background(), arg)
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, err
+}
+
+func createRandomTransactionWithUser(t *testing.T, user User) (Transaction, error) {
+	var transaction Transaction
+	category, err := testQueries.CreateCategory(context.Background(), CreateCategoryParams{
+		UserID: user.ID,
+		Type:   Transactiontype(util.RandomType()),
+		Icon:   util.RandomString(5),
+		Name:   util.RandomString(5),
+	})
+	if err != nil {
+		return transaction, err
+	}
+	wallet, err := testQueries.CreateWallet(context.Background(), CreateWalletParams{
+		UserID: user.ID,
+		Name:   util.RandomString(5),
+	})
+	if err != nil {
+		return transaction, err
+	}
+	arg := CreateTransactionParams{
+		Amount:     util.RandomAmount(),
+		Type:       Transactiontype(util.RandomType()),
+		UserID:     user.ID,
+		CategoryID: category.ID,
+		WalletID:   wallet.ID,
 	}
 
 	transaction, err = testQueries.CreateTransaction(context.Background(), arg)
@@ -57,23 +91,23 @@ func TestCreateTransaction(t *testing.T) {
 	})
 	require.NoError(t, err)
 	category, err := testQueries.CreateCategory(context.Background(), CreateCategoryParams{
-		UserID: util.NullInt(int(user.ID)),
+		UserID: user.ID,
 		Type:   Transactiontype(util.RandomType()),
 		Icon:   util.RandomString(5),
 		Name:   util.RandomString(5),
 	})
 	require.NoError(t, err)
 	wallet, err := testQueries.CreateWallet(context.Background(), CreateWalletParams{
-		UserID: util.NullInt(int(user.ID)),
+		UserID: user.ID,
 		Name:   util.RandomString(5),
 	})
 	require.NoError(t, err)
 	arg := CreateTransactionParams{
 		Amount:     util.RandomAmount(),
 		Type:       Transactiontype(util.RandomType()),
-		UserID:     util.NullInt(int(user.ID)),
+		UserID:     user.ID,
 		CategoryID: category.ID,
-		WalletID:   util.NullInt(int(wallet.ID)),
+		WalletID:   wallet.ID,
 	}
 
 	trx, err := testQueries.CreateTransaction(context.Background(), arg)
@@ -85,11 +119,16 @@ func TestCreateTransaction(t *testing.T) {
 }
 
 func TestListTransactions(t *testing.T) {
+	user := createRandomUser(t)
+	var transaction Transaction
 	for i := 0; i < 5; i++ {
-		createRandomTransaction(t)
+		trx, err := createRandomTransactionWithUser(t, user)
+		transaction = trx
+		require.NoError(t, err)
 	}
 
 	arg := ListTransactionsParams{
+		UserID: transaction.UserID,
 		Limit:  5,
 		Offset: 0,
 	}

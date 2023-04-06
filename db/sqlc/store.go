@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-
-	"github.com/rezyfr/Trackerr-BackEnd/util"
 )
 
 // Store provide all functions to execute db queries and transactions
@@ -63,8 +61,8 @@ func (store *Store) CreateTransactionTx(ctx context.Context, arg NewTransactionT
 		result.Transaction, err = q.CreateTransaction(ctx, CreateTransactionParams{
 			Amount:     arg.Amount,
 			Type:       arg.Type,
-			UserID:     util.NullInt(int(arg.UserID)),
-			WalletID:   util.NullInt(int(arg.WalletID)),
+			UserID:     arg.UserID,
+			WalletID:   arg.WalletID,
 			CategoryID: arg.CategoryID,
 		})
 		if err != nil {
@@ -130,7 +128,7 @@ func (store *Store) UpdateWalletTx(ctx context.Context, arg UpdateWalletTxParams
 			Amount:     int64(math.Abs(float64(transactionAmount))),
 			Type:       transactionType,
 			UserID:     currentWallet.UserID,
-			WalletID:   util.NullInt(int(arg.ID)),
+			WalletID:   arg.ID,
 			CategoryID: 1,
 		})
 		if err != nil {

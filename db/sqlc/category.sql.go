@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createCategory = `-- name: CreateCategory :one
@@ -22,7 +21,7 @@ INSERT INTO category (
 `
 
 type CreateCategoryParams struct {
-	UserID sql.NullInt64   `json:"user_id"`
+	UserID int64           `json:"user_id"`
 	Name   string          `json:"name"`
 	Type   Transactiontype `json:"type"`
 	Icon   string          `json:"icon"`
@@ -84,13 +83,13 @@ WHERE user_id = $1
 ORDER BY name
 `
 
-func (q *Queries) ListCategories(ctx context.Context, userID sql.NullInt64) ([]Category, error) {
+func (q *Queries) ListCategories(ctx context.Context, userID int64) ([]Category, error) {
 	rows, err := q.db.QueryContext(ctx, listCategories, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Category
+	items := []Category{}
 	for rows.Next() {
 		var i Category
 		if err := rows.Scan(

@@ -10,9 +10,10 @@ INSERT INTO transactions (
 ) RETURNING *;
 
 -- name: ListTransactions :many
-SELECT * FROM transactions
+SELECT * FROM transactions 
+WHERE user_id = $1
 ORDER BY created_at
-LIMIT $1 OFFSET $2;
+LIMIT $2 OFFSET $3;
 
 -- name: GetTransaction :one
 SELECT * FROM transactions
