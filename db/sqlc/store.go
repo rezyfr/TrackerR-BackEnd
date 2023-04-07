@@ -9,21 +9,28 @@ import (
 )
 
 // Store provide all functions to execute db queries and transactions
-type Store struct {
+type Store interface {
+	Querier
+	CreateTransactionTx(ctx context.Context, arg NewTransactionTxParams) (NewTransactionTxResult, error)
+	UpdateWalletTx(ctx context.Context, arg UpdateWalletTxParams) (UpdateWalletTxResult, error)
+}
+
+// Store provide all functions to execute db queries and transactions
+type SQLStore struct {
 	*Queries
 	db *sql.DB
 }
 
 // NewStore creates a new store
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		Queries: New(db),
 		db:      db,
 	}
 }
 
 // execTx executes a function within a database transaction
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -53,7 +60,7 @@ type NewTransactionTxResult struct {
 	Category    Category    `json:"category"`
 }
 
-func (store *Store) CreateTransactionTx(ctx context.Context, arg NewTransactionTxParams) (NewTransactionTxResult, error) {
+func (store *SQLStore) CreateTransactionTx(ctx context.Context, arg NewTransactionTxParams) (NewTransactionTxResult, error) {
 	var result NewTransactionTxResult
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
@@ -99,7 +106,7 @@ type UpdateWalletTxResult struct {
 	Transaction Transaction `json:"transaction"`
 }
 
-func (store *Store) UpdateWalletTx(ctx context.Context, arg UpdateWalletTxParams) (UpdateWalletTxResult, error) {
+func (store *SQLStore) UpdateWalletTx(ctx context.Context, arg UpdateWalletTxParams) (UpdateWalletTxResult, error) {
 	var result UpdateWalletTxResult
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
