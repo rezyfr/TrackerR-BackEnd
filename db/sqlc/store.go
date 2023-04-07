@@ -50,6 +50,7 @@ type NewTransactionTxParams struct {
 	Amount     int64           `json:"amount"`
 	Type       Transactiontype `json:"type"`
 	UserID     int64           `json:"user_id"`
+	Note       string          `json:"note"`
 	CategoryID int64           `json:"category_id"`
 	WalletID   int64           `json:"wallet_id"`
 }
@@ -69,6 +70,7 @@ func (store *SQLStore) CreateTransactionTx(ctx context.Context, arg NewTransacti
 			Amount:     arg.Amount,
 			Type:       arg.Type,
 			UserID:     arg.UserID,
+			Note:       arg.Note,
 			WalletID:   arg.WalletID,
 			CategoryID: arg.CategoryID,
 		})

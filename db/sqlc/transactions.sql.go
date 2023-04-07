@@ -14,17 +14,19 @@ INSERT INTO transactions (
   user_id, 
   amount,
   type,
+  note,
   category_id,
   wallet_id
 ) VALUES (
-  $1, $2, $3, $4, $5
-) RETURNING id, user_id, amount, created_at, updated_at, type, category_id, wallet_id
+  $1, $2, $3, $4, $5, $6
+) RETURNING id, user_id, amount, note, created_at, updated_at, type, category_id, wallet_id
 `
 
 type CreateTransactionParams struct {
 	UserID     int64           `json:"user_id"`
 	Amount     int64           `json:"amount"`
 	Type       Transactiontype `json:"type"`
+	Note       string          `json:"note"`
 	CategoryID int64           `json:"category_id"`
 	WalletID   int64           `json:"wallet_id"`
 }
@@ -34,6 +36,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.UserID,
 		arg.Amount,
 		arg.Type,
+		arg.Note,
 		arg.CategoryID,
 		arg.WalletID,
 	)
@@ -42,6 +45,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.ID,
 		&i.UserID,
 		&i.Amount,
+		&i.Note,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Type,
@@ -62,7 +66,7 @@ func (q *Queries) DeleteTransaction(ctx context.Context, id int64) error {
 }
 
 const getTransaction = `-- name: GetTransaction :one
-SELECT id, user_id, amount, created_at, updated_at, type, category_id, wallet_id FROM transactions
+SELECT id, user_id, amount, note, created_at, updated_at, type, category_id, wallet_id FROM transactions
 WHERE id = $1 LIMIT 1
 `
 
@@ -73,6 +77,7 @@ func (q *Queries) GetTransaction(ctx context.Context, id int64) (Transaction, er
 		&i.ID,
 		&i.UserID,
 		&i.Amount,
+		&i.Note,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Type,
@@ -83,7 +88,7 @@ func (q *Queries) GetTransaction(ctx context.Context, id int64) (Transaction, er
 }
 
 const listTransactions = `-- name: ListTransactions :many
-SELECT id, user_id, amount, created_at, updated_at, type, category_id, wallet_id FROM transactions 
+SELECT id, user_id, amount, note, created_at, updated_at, type, category_id, wallet_id FROM transactions 
 WHERE user_id = $1
 ORDER BY created_at
 LIMIT $2 OFFSET $3
@@ -108,6 +113,7 @@ func (q *Queries) ListTransactions(ctx context.Context, arg ListTransactionsPara
 			&i.ID,
 			&i.UserID,
 			&i.Amount,
+			&i.Note,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Type,
@@ -134,7 +140,7 @@ UPDATE transactions SET
   category_id = $3,
   wallet_id = $4
 WHERE id = $5
-RETURNING id, user_id, amount, created_at, updated_at, type, category_id, wallet_id
+RETURNING id, user_id, amount, note, created_at, updated_at, type, category_id, wallet_id
 `
 
 type UpdateTransactionParams struct {
@@ -158,6 +164,7 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 		&i.ID,
 		&i.UserID,
 		&i.Amount,
+		&i.Note,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Type,

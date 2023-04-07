@@ -6,7 +6,7 @@ CREATE TYPE "transactiontype" AS ENUM (
 
 CREATE TABLE "users" (
   "id" bigserial PRIMARY KEY,
-  "email" varchar NOT NULL,
+  "email" varchar UNIQUE NOT NULL,
   "full_name" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
@@ -15,6 +15,7 @@ CREATE TABLE "transactions" (
   "id" bigserial PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "amount" bigint NOT NULL,
+  "note" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
   "type" transactiontype NOT NULL,

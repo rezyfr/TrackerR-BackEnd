@@ -67,6 +67,7 @@ type Transaction struct {
 	ID         int64           `json:"id"`
 	UserID     int64           `json:"user_id"`
 	Amount     int64           `json:"amount"`
+	Note       string          `json:"note"`
 	CreatedAt  time.Time       `json:"created_at"`
 	UpdatedAt  time.Time       `json:"updated_at"`
 	Type       Transactiontype `json:"type"`
