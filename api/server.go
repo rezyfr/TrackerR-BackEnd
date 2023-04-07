@@ -2,6 +2,8 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	db "github.com/rezyfr/Trackerr-BackEnd/db/sqlc"
 )
 
@@ -16,9 +18,14 @@ func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
 	router := gin.Default()
 
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("trxtype", validType)
+	}
+
 	router.POST("/users", server.createUser)
 	router.GET("/users/:id", server.getUser)
 	router.GET("/transactions", server.listTransactions)
+	router.POST("/transactions", server.createTransaction)
 
 	// add routes to router
 	server.router = router
