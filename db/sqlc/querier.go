@@ -20,7 +20,8 @@ type Querier interface {
 	DeleteWallet(ctx context.Context, id int64) error
 	GetCategory(ctx context.Context, id int64) (Category, error)
 	GetTransaction(ctx context.Context, id int64) (Transaction, error)
-	GetUser(ctx context.Context, id int64) (User, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserById(ctx context.Context, id int64) (User, error)
 	GetWallet(ctx context.Context, id int64) (Wallet, error)
 	GetWalletForUpdate(ctx context.Context, id int64) (Wallet, error)
 	ListCategories(ctx context.Context, userID int64) ([]Category, error)

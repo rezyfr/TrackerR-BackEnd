@@ -61,7 +61,7 @@ func TestGetUserApi(t *testing.T) {
 			userID: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetUser(gomock.Any(), gomock.Eq(user.ID)).
+					GetUserById(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
 					Return(user, nil)
 			},
@@ -75,7 +75,7 @@ func TestGetUserApi(t *testing.T) {
 			userID: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetUser(gomock.Any(), gomock.Eq(user.ID)).
+					GetUserById(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
 					Return(db.User{}, sql.ErrNoRows)
 			},
@@ -88,7 +88,7 @@ func TestGetUserApi(t *testing.T) {
 			userID: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetUser(gomock.Any(), gomock.Eq(user.ID)).
+					GetUserById(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
 					Return(db.User{}, sql.ErrConnDone)
 			},
@@ -101,7 +101,7 @@ func TestGetUserApi(t *testing.T) {
 			userID: -1,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetUser(gomock.Any(), gomock.Any()).
+					GetUserById(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -121,7 +121,7 @@ func TestGetUserApi(t *testing.T) {
 			tc.buildStubs(store)
 
 			// start test server and send request
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			url := fmt.Sprintf("/users/%d", tc.userID)
@@ -227,7 +227,7 @@ func TestCreateUserApi(t *testing.T) {
 			tc.buildStubs(store)
 
 			// start test server and send request
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			jsonValue, _ := json.Marshal(tc.body)
