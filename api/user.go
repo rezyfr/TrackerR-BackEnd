@@ -3,14 +3,24 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 	db "github.com/rezyfr/Trackerr-BackEnd/db/sqlc"
+	"github.com/rezyfr/Trackerr-BackEnd/util"
 )
 
 type createUserRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	FullName string `json:"full_name" binding:"required"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+type createUserResponse struct {
+	Email     string    `json:"email"`
+	FullName  string    `json:"full_name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (server *Server) createUser(ctx *gin.Context) {
@@ -20,18 +30,37 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.CreateUserParams{
-		Email:    req.Email,
-		FullName: req.FullName,
-	}
-
-	user, err := server.store.CreateUser(ctx, arg)
+	hashedPassword, err := util.HashPassword(req.Password)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	arg := db.CreateUserParams{
+		Email:          req.Email,
+		FullName:       req.FullName,
+		HashedPassword: hashedPassword,
+	}
+
+	user, err := server.store.CreateUser(ctx, arg)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	rsp := createUserResponse{
+		Email:     user.Email,
+		FullName:  user.FullName,
+		CreatedAt: user.CreatedAt,
+	}
+	ctx.JSON(http.StatusOK, rsp)
 }
 
 type getUserRequest struct {
@@ -56,5 +85,9 @@ func (server *Server) getUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, createUserResponse{
+		Email:     user.Email,
+		FullName:  user.FullName,
+		CreatedAt: user.CreatedAt,
+	})
 }

@@ -76,10 +76,11 @@ type Transaction struct {
 }
 
 type User struct {
-	ID        int64     `json:"id"`
-	Email     string    `json:"email"`
-	FullName  string    `json:"full_name"`
-	CreatedAt time.Time `json:"created_at"`
+	ID             int64     `json:"id"`
+	Email          string    `json:"email"`
+	HashedPassword string    `json:"hashed_password"`
+	FullName       string    `json:"full_name"`
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 type Wallet struct {

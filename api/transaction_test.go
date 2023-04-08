@@ -15,7 +15,7 @@ import (
 )
 
 func TestListTransactions(t *testing.T) {
-	user := randomUser()
+	user, _ := randomUser(t)
 	n := 5
 	transactions := make([]db.Transaction, n)
 	for i := 0; i < n; i++ {

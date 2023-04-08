@@ -11,9 +11,13 @@ import (
 )
 
 func createRandomUser(t *testing.T) User {
+	hashedPassword, err := util.HashPassword(util.RandomString(6))
+	require.NoError(t, err)
+
 	arg := CreateUserParams{
-		Email:    util.RandomEmail(),
-		FullName: util.RandomFullName(),
+		Email:          util.RandomEmail(),
+		FullName:       util.RandomFullName(),
+		HashedPassword: hashedPassword,
 	}
 
 	user, err := testQueries.CreateUser(context.Background(), arg)
@@ -22,14 +26,20 @@ func createRandomUser(t *testing.T) User {
 
 	require.Equal(t, arg.Email, user.Email)
 	require.Equal(t, arg.FullName, user.FullName)
+	require.Equal(t, arg.HashedPassword, user.HashedPassword)
+	require.NotZero(t, user.CreatedAt)
 
 	return user
 }
 
 func TestCreateUser(t *testing.T) {
+	hashedPassword, err := util.HashPassword(util.RandomString(6))
+	require.NoError(t, err)
+
 	arg := CreateUserParams{
-		Email:    util.RandomEmail(),
-		FullName: util.RandomFullName(),
+		Email:          util.RandomEmail(),
+		FullName:       util.RandomFullName(),
+		HashedPassword: hashedPassword,
 	}
 
 	user, err := testQueries.CreateUser(context.Background(), arg)
@@ -38,6 +48,8 @@ func TestCreateUser(t *testing.T) {
 
 	require.Equal(t, arg.Email, user.Email)
 	require.Equal(t, arg.FullName, user.FullName)
+	require.Equal(t, arg.HashedPassword, user.HashedPassword)
+	require.NotZero(t, user.CreatedAt)
 }
 
 func TestGetUser(t *testing.T) {
