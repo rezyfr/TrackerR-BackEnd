@@ -1,5 +1,5 @@
 postgres:
-	docker run --name postgres15 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres:15
+	docker run --name postgres15 --network trackerr-network -e POSTGRES_USER=root -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres:15
 createdb:
 	docker exec -it postgres15 createdb --username=root --owner=root trackerr
 
