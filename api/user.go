@@ -18,6 +18,7 @@ type createUserRequest struct {
 }
 
 type userResponse struct {
+	ID        int64     `json:"id"`
 	Email     string    `json:"email"`
 	FullName  string    `json:"full_name"`
 	CreatedAt time.Time `json:"created_at"`
@@ -25,6 +26,7 @@ type userResponse struct {
 
 func newUserResponse(user db.User) userResponse {
 	return userResponse{
+		ID:        user.ID,
 		Email:     user.Email,
 		FullName:  user.FullName,
 		CreatedAt: user.CreatedAt,
@@ -90,6 +92,7 @@ func (server *Server) getUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, userResponse{
+		ID:        user.ID,
 		Email:     user.Email,
 		FullName:  user.FullName,
 		CreatedAt: user.CreatedAt,
@@ -130,7 +133,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	token, _, err := server.tokenMaker.CreateToken(user.Email, server.config.AccessTokenDuration)
+	token, _, err := server.tokenMaker.CreateToken(user.Email, user.ID, server.config.AccessTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

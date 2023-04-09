@@ -36,7 +36,6 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	}
 
 	server.setupRouter()
-	// add routes to router
 	return server, nil
 }
 
@@ -45,10 +44,12 @@ func (server *Server) setupRouter() {
 
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
-	router.GET("/users/:id", server.getUser)
 
-	router.GET("/transactions", server.listTransactions)
-	router.POST("/transactions", server.createTransaction)
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+
+	authRoutes.GET("/users/:id", server.getUser)
+	authRoutes.GET("/transactions", server.listTransactions)
+	authRoutes.POST("/transactions", server.createTransaction)
 
 	server.router = router
 }

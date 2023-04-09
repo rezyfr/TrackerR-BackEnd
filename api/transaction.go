@@ -6,12 +6,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/rezyfr/Trackerr-BackEnd/db/sqlc"
+	"github.com/rezyfr/Trackerr-BackEnd/token"
 )
 
 type listTransactionRequest struct {
 	Limit  int32 `form:"page_limit,default=10" binding:"max=50"`
 	Offset int32 `form:"page_offset,default=0"`
-	UserID int64 `form:"user_id,default=0"`
 }
 
 func (server *Server) listTransactions(ctx *gin.Context) {
@@ -20,8 +20,10 @@ func (server *Server) listTransactions(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	arg := db.ListTransactionsParams{
-		UserID: req.UserID,
+		UserID: int64(authPayload.UserID),
 		Limit:  req.Limit,
 		Offset: (req.Offset - 1) * req.Limit,
 	}
@@ -40,7 +42,6 @@ type createTransactionRequest struct {
 	Note       string `json:"note" binding:"required"`
 	Type       string `json:"type" binding:"required,trxtype"`
 	CategoryID int64  `json:"category_id" binding:"required"`
-	UserID     int64  `json:"user_id" binding:"required"`
 	WalletID   int64  `json:"wallet_id" binding:"required"`
 }
 
@@ -59,12 +60,14 @@ func (server *Server) createTransaction(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	arg := db.NewTransactionTxParams{
 		Amount:     req.Amount,
 		Note:       req.Note,
 		Type:       db.Transactiontype(req.Type),
 		CategoryID: req.CategoryID,
-		UserID:     req.UserID,
+		UserID:     int64(authPayload.UserID),
 		WalletID:   req.WalletID,
 	}
 

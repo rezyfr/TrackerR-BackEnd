@@ -66,6 +66,22 @@ func (store *SQLStore) CreateTransactionTx(ctx context.Context, arg NewTransacti
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
+		wallet, err := q.GetWallet(ctx, arg.WalletID)
+		if err != nil {
+			return err
+		}
+		if wallet.UserID != arg.UserID {
+			return errors.New("wallet does not belong to user")
+		}
+
+		result.Category, err = q.GetCategory(ctx, arg.CategoryID)
+		if err != nil {
+			return err
+		}
+		if result.Category.UserID != arg.UserID {
+			return errors.New("category does not belong to user")
+		}
+
 		result.Transaction, err = q.CreateTransaction(ctx, CreateTransactionParams{
 			Amount:     arg.Amount,
 			Type:       arg.Type,
@@ -74,10 +90,6 @@ func (store *SQLStore) CreateTransactionTx(ctx context.Context, arg NewTransacti
 			WalletID:   arg.WalletID,
 			CategoryID: arg.CategoryID,
 		})
-		if err != nil {
-			return err
-		}
-		result.Category, err = q.GetCategory(ctx, arg.CategoryID)
 		if err != nil {
 			return err
 		}

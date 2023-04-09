@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	mockdb "github.com/rezyfr/Trackerr-BackEnd/db/mock"
 	db "github.com/rezyfr/Trackerr-BackEnd/db/sqlc"
+	"github.com/rezyfr/Trackerr-BackEnd/token"
 	"github.com/rezyfr/Trackerr-BackEnd/util"
 	"github.com/stretchr/testify/require"
 )
@@ -30,13 +32,17 @@ func TestListTransactions(t *testing.T) {
 	testCases := []struct {
 		query         Query
 		name          string
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		userId        int64
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:   "OK",
-			query:  Query{pageLimit: n, pageOffset: 1},
+			name:  "OK",
+			query: Query{pageLimit: n, pageOffset: 1},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Email, int(user.ID), time.Minute)
+			},
 			userId: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.ListTransactionsParams{
@@ -54,8 +60,11 @@ func TestListTransactions(t *testing.T) {
 			},
 		},
 		{
-			name:   "InternalError",
-			query:  Query{pageLimit: n, pageOffset: 1},
+			name:  "InternalError",
+			query: Query{pageLimit: n, pageOffset: 1},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Email, int(user.ID), time.Minute)
+			},
 			userId: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.ListTransactionsParams{
@@ -78,6 +87,9 @@ func TestListTransactions(t *testing.T) {
 				pageLimit:  51,
 				pageOffset: 1,
 			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Email, int(user.ID), time.Minute)
+			},
 			userId: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.ListTransactionsParams{
@@ -93,6 +105,44 @@ func TestListTransactions(t *testing.T) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
 		},
+		{
+			name:  "Unauthorized",
+			query: Query{pageLimit: n, pageOffset: 1},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "unauthorized@gmail.com", int(user.ID), time.Minute)
+			},
+			userId: user.ID,
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.ListTransactionsParams{
+					Limit:  int32(n),
+					Offset: 0,
+					UserID: user.ID,
+				}
+				store.EXPECT().
+					ListTransactions(gomock.Any(), gomock.Eq(arg)).
+					Times(1).
+					Return(transactions, nil)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		// {
+		// 	name:  "No Authorization",
+		// 	query: Query{pageLimit: n, pageOffset: 1},
+		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+		// 		addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "", int(user.ID), time.Minute)
+		// 	},
+		// 	userId: user.ID,
+		// 	buildStubs: func(store *mockdb.MockStore) {
+		// 		store.EXPECT().
+		// 			ListTransactions(gomock.Any(), gomock.Any()).
+		// 			Times(0)
+		// 	},
+		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+		// 		require.Equal(t, http.StatusUnauthorized, recorder.Code)
+		// 	},
+		// },
 	}
 
 	for i := range testCases {
@@ -119,6 +169,7 @@ func TestListTransactions(t *testing.T) {
 			request.URL.RawQuery = q.Encode()
 			require.NoError(t, err)
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})

@@ -26,8 +26,8 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	return maker, nil
 }
 
-func (maker *PasetoMaker) CreateToken(email string, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(email, duration)
+func (maker *PasetoMaker) CreateToken(email string, userID int64, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(email, userID, duration)
 	if err != nil {
 		return "", payload, err
 	}
