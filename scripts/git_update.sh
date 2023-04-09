@@ -27,13 +27,13 @@ MAJOR=${CURRENT_VERSION_PARTS[0]}
 MINOR=${CURRENT_VERSION_PARTS[1]}
 PATCH=${CURRENT_VERSION_PARTS[2]}
 
-if [[ $VERSION == 'major']]
+if [[ $VERSION == 'major' ]]
 then 
     MAJOR=v$((MAJOR+1))
-elif [[ $VERSION == 'minor']]
+elif [[ $VERSION == 'minor' ]]
 then 
     MINOR=$((MINOR+1))
-elif [[ $VERSION == 'patch']]
+elif [[ $VERSION == 'patch' ]]
 then 
     PATCH=$((PATCH+1))
 else
@@ -49,7 +49,7 @@ echo "($VERSION) updating $CURRENT_VERSION to $NEW_TAG"
 GIT_COMMIT=`git rev-parse HEAD`
 NEEDS_TAG=`git describe --contains $GIT_COMMIT 2>/dev/null`
 
-if [-z "$NEEDS_TAG"]; then
+if [ -z "$NEEDS_TAG" ]; then
     echo "Tagged with $NEW_TAG"
     git tag $NEW_TAG
     git push --tags
