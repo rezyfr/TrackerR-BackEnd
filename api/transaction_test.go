@@ -106,43 +106,20 @@ func TestListTransactions(t *testing.T) {
 			},
 		},
 		{
-			name:  "Unauthorized",
+			name:  "No Authorization",
 			query: Query{pageLimit: n, pageOffset: 1},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "unauthorized@gmail.com", int(user.ID), time.Minute)
 			},
 			userId: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
-				arg := db.ListTransactionsParams{
-					Limit:  int32(n),
-					Offset: 0,
-					UserID: user.ID,
-				}
 				store.EXPECT().
-					ListTransactions(gomock.Any(), gomock.Eq(arg)).
-					Times(1).
-					Return(transactions, nil)
+					ListTransactions(gomock.Any(), gomock.Any()).
+					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
-		// {
-		// 	name:  "No Authorization",
-		// 	query: Query{pageLimit: n, pageOffset: 1},
-		// 	setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-		// 		addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "", int(user.ID), time.Minute)
-		// 	},
-		// 	userId: user.ID,
-		// 	buildStubs: func(store *mockdb.MockStore) {
-		// 		store.EXPECT().
-		// 			ListTransactions(gomock.Any(), gomock.Any()).
-		// 			Times(0)
-		// 	},
-		// 	checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-		// 		require.Equal(t, http.StatusUnauthorized, recorder.Code)
-		// 	},
-		// },
 	}
 
 	for i := range testCases {
