@@ -1,56 +1,33 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
-	"net/http"
-	"os"
 
-	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
+	"github.com/rezyfr/Trackerr-BackEnd/api"
+	db "github.com/rezyfr/Trackerr-BackEnd/db/sqlc"
+	"github.com/rezyfr/Trackerr-BackEnd/util"
 )
 
-type User struct {
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
-
-var users = []User{
-	{Email: "frizkillah98@gmail.com", Name: "Fidriyanto Rizkillah"},
-}
-
-func getUsers(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, users)
-}
-
-func getUserByEmail(c *gin.Context) {
-	email := c.Param("email")
-	for _, a := range users {
-		if a.Email == email {
-			c.IndentedJSON(http.StatusOK, a)
-			return
-		}
-	}
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
-}
-
-func postUsers(c *gin.Context) {
-	var newUser User
-	if err := c.BindJSON(&newUser); err != nil {
-		return
-	}
-	users = append(users, newUser)
-	c.IndentedJSON(http.StatusCreated, newUser)
-}
-
 func main() {
-	router := gin.Default()
-	router.GET("/users", getUsers)
-	router.GET("/users/:email", getUserByEmail)
-	router.POST("/users", postUsers)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config: ", err)
 	}
-	router.Run("0.0.0.0:" + port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
+	if err != nil {
+		log.Fatal("cannot connect to db: ", err)
+	}
+
+	store := db.NewStore(conn)
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server: ", err)
+	}
+
+	err = server.Start(config.ServerAddress)
+	if err != nil {
+		log.Fatal("cannot start server: ", err)
+	}
 }
