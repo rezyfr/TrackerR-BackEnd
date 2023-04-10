@@ -7,10 +7,10 @@ dropdb:
 	docker exec -it postgres15 dropdb trackerr
 
 migrateup:
-	migrate -path db/migration -database "postgresql://root:postgres@localhost:5432/trackerr?sslmode=disable" -verbose up
+	migrate -path db/migration -database "postgresql://postgres:dx1%3F%281%5CMN5KY%3D%3ADm@34.101.74.76:5432/trackerr-dev" -verbose up
 
 migratedown: 
-	migrate -path db/migration -database "postgresql://root:postgres@localhost:5432/trackerr?sslmode=disable" -verbose down
+	migrate -path db/migration -database "postgresql://postgres:dx1%3F%281%5CMN5KY%3D%3ADm@34.101.74.76:5432/trackerr-dev" -verbose down
 
 sqlc:
 	sqlc generate	
