@@ -11,11 +11,6 @@ jobs:
       env: 
         IMAGE_NAME: trackerr-api
         PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-        TOKEN_DURATION: ACCESS_TOKEN_DURATION
-        TOKEN_KEY: TOKEN_SYMMETRIC_KEY
-        SERVER_ADDRESS: SERVER_ADDRESS
-        DB_DRIVER: DB_DRIVER
-        DB_SOURCE: DB_SOURCE
       steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -29,15 +24,15 @@ jobs:
 
       - name: Read secrets from GCP Secret Manager
         run: |
-          token_duration=$(gcloud secrets versions access latest --quiet --secret=$TOKEN_DURATION)
+          token_duration=$(gcloud secrets versions access latest --quiet --secret=ACCESS_TOKEN_DURATION)
           echo "::set-env name=TOKEN_DURATION::$token_duration"
-          token_key=$(gcloud secrets versions access latest --quiet --secret=$TOKEN_SYMMETRIC_KEY)
+          token_key=$(gcloud secrets versions access latest --quiet --secret=TOKEN_SYMMETRIC_KEY)
           echo "::set-env name=TOKEN_SYMMETRIC_KEY::$token_key"
-          db_driver=$(gcloud secrets versions access latest --quiet --secret=$DB_DRIVER)
+          db_driver=$(gcloud secrets versions access latest --quiet --secret=DB_DRIVER)
           echo "::set-env name=DB_DRIVER::$db_driver"
-          server_address=$(gcloud secrets versions access latest --quiet --secret=$SERVER_ADDRESS)
+          server_address=$(gcloud secrets versions access latest --quiet --secret=SERVER_ADDRESS)
           echo "::set-env name=SERVER_ADDRESS::$server_address"
-          db_source=$(gcloud secrets versions access latest --quiet --secret=$DB_SOURCE)
+          db_source=$(gcloud secrets versions access latest --quiet --secret=DB_SOURCE)
           echo "::set-env name=DB_SOURCE::$db_source"
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
