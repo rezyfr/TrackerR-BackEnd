@@ -2,7 +2,7 @@ name: Deploy to production
 
 on:
   push:
-    branches: [ master, test-actions ]
+    branches: [ master, feat/secret-manager ]
 
 jobs:
     build-push-gcr: 
@@ -12,6 +12,10 @@ jobs:
         IMAGE_NAME: trackerr-api
         PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         TOKEN_DURATION: ACCESS_TOKEN_DURATION
+        TOKEN_KEY: TOKEN_SYMMETRIC_KEY
+        SERVER_ADDRESS: SERVER_ADDRESS
+        DB_DRIVER: DB_DRIVER
+        DB_SOURCE: DB_SOURCE
       steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -23,16 +27,30 @@ jobs:
           service_account_key: ${{ secrets.GCP_CREDENTIALS }}
           export_default_credentials: true
 
-      - name: Read secret from GCP Secret Manager
+      - name: Read secrets from GCP Secret Manager
         run: |
-          secret=$(gcloud secrets versions access latest --quiet --secret=$TOKEN_DURATION)
-          echo "::set-env name=SECRET_VAR::$secret"
+          token_duration=$(gcloud secrets versions access latest --quiet --secret=$TOKEN_DURATION)
+          echo "::set-env name=TOKEN_DURATION::$token_duration"
+          token_key=$(gcloud secrets versions access latest --quiet --secret=$TOKEN_SYMMETRIC_KEY)
+          echo "::set-env name=TOKEN_SYMMETRIC_KEY::$token_key"
+          db_driver=$(gcloud secrets versions access latest --quiet --secret=$DB_DRIVER)
+          echo "::set-env name=DB_DRIVER::$db_driver"
+          server_address=$(gcloud secrets versions access latest --quiet --secret=$SERVER_ADDRESS)
+          echo "::set-env name=SERVER_ADDRESS::$server_address"
+          db_source=$(gcloud secrets versions access latest --quiet --secret=$DB_SOURCE)
+          echo "::set-env name=DB_SOURCE::$db_source"
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
-      - name: Use secret
+      - name: Execute secret values
         run: |
-          echo "Secret value is: $SECRET_VAR"
+          rm config.env
+          echo "DB_DRIVER=$DB_DRIVER"
+          echo "DB_SOURCE=$DB_SOURCE"
+          echo "ACCESS_TOKEN_DURATION=$TOKEN_DURATION"
+          echo "TOKEN_SYMMETRIC_KEY=$TOKEN_SYMMETRIC_KEY"
+          echo "SERVER_ADDRESS=$SERVER_ADDRESS"
+          cat config.env
       # - name: Build Docker Image
       #   run: docker build -t $IMAGE_NAME:latest .
 
