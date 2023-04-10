@@ -40,11 +40,11 @@ jobs:
       - name: Execute secret values
         run: |
           rm config.env
-          echo "DB_DRIVER=$DB_DRIVER"
-          echo "DB_SOURCE=$DB_SOURCE"
-          echo "ACCESS_TOKEN_DURATION=$TOKEN_DURATION"
-          echo "TOKEN_SYMMETRIC_KEY=$TOKEN_SYMMETRIC_KEY"
-          echo "SERVER_ADDRESS=$SERVER_ADDRESS"
+          echo "DB_DRIVER=$DB_DRIVER"  >> config.env
+          echo "DB_SOURCE=$DB_SOURCE" >> config.env
+          echo "ACCESS_TOKEN_DURATION=$TOKEN_DURATION" >> config.env
+          echo "TOKEN_SYMMETRIC_KEY=$TOKEN_SYMMETRIC_KEY" >> config.env
+          echo "SERVER_ADDRESS=$SERVER_ADDRESS" >> config.env
           cat config.env
       # - name: Build Docker Image
       #   run: docker build -t $IMAGE_NAME:latest .
