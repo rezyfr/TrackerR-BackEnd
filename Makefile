@@ -1,4 +1,4 @@
-DB_URL=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
+DB_URL=postgresql://root:postgres@localhost:5432/trackerr?sslmode=disable
 
 postgres:
 	docker run --name postgres15 --network trackerr-network -e POSTGRES_USER=root -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres:15
