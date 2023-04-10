@@ -45,34 +45,34 @@ jobs:
           echo "ACCESS_TOKEN_DURATION=$TOKEN_DURATION" >> config.env
           echo "TOKEN_SYMMETRIC_KEY=$TOKEN_SYMMETRIC_KEY" >> config.env
           echo "SERVER_ADDRESS=$SERVER_ADDRESS" >> config.env
-          cat config.env
-      # - name: Build Docker Image
-      #   run: docker build -t $IMAGE_NAME:latest .
 
-      # - name: Automatic Tagging of Releases
-      #   id: increment-git-tag
-      #   run: |
-      #     bash ./scripts/git_update.sh -v patch
+      - name: Build Docker Image
+        run: docker build -t $IMAGE_NAME:latest .
 
-      # - name: Configure Docker Client
-      #   run: |-
-      #     gcloud auth configure-docker --quiet
-      #     gcloud auth configure-docker asia-southeast2-docker.pkg.dev --quiet
+      - name: Automatic Tagging of Releases
+        id: increment-git-tag
+        run: |
+          bash ./scripts/git_update.sh -v patch
 
-      # - name: Push Docker Image to Container Registry (GCR)
-      #   env:
-      #     GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-      #   run: |-
-      #     docker tag $IMAGE_NAME:latest asia.gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
-      #     docker tag $IMAGE_NAME:latest asia.gcr.io/$PROJECT_ID/$IMAGE_NAME:$GIT_TAG
-      #     docker push asia.gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
-      #     docker push asia.gcr.io/$PROJECT_ID/$IMAGE_NAME:$GIT_TAG
+      - name: Configure Docker Client
+        run: |-
+          gcloud auth configure-docker --quiet
+          gcloud auth configure-docker asia-southeast2-docker.pkg.dev --quiet
+
+      - name: Push Docker Image to Container Registry (GCR)
+        env:
+          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+        run: |-
+          docker tag $IMAGE_NAME:latest asia.gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
+          docker tag $IMAGE_NAME:latest asia.gcr.io/$PROJECT_ID/$IMAGE_NAME:$GIT_TAG
+          docker push asia.gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
+          docker push asia.gcr.io/$PROJECT_ID/$IMAGE_NAME:$GIT_TAG
       
-      # - name: Push Docker Image to Artifact Registry
-      #   env:
-      #     GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-      #   run: |-
-      #     docker tag $IMAGE_NAME:latest asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:latest
-      #     docker tag $IMAGE_NAME:latest asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:$GIT_TAG
-      #     docker push asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:latest
-      #     docker push asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:$GIT_TAG
+      - name: Push Docker Image to Artifact Registry
+        env:
+          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+        run: |-
+          docker tag $IMAGE_NAME:latest asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:latest
+          docker tag $IMAGE_NAME:latest asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:$GIT_TAG
+          docker push asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:latest
+          docker push asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:$GIT_TAG
