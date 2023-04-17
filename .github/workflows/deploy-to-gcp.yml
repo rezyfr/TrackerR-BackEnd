@@ -55,7 +55,7 @@ jobs:
           
       - name: Deploy to Cloud Run
         id: deploy
-        run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:latest --region asia-southeast2 --platform managed --
+        run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:latest --region asia-southeast2 --platform managed
 
         # If required, use the Cloud Run url output in later steps
       - name: Show Output
