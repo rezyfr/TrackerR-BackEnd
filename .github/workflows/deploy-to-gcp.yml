@@ -1,0 +1,62 @@
+name: Deploy to production
+
+on:
+  push:
+    branches: [ master, cloud-run ]
+
+jobs:
+    build-push-gcr:
+      name: Build and Push to GCP
+      runs-on: ubuntu-latest
+      env:
+        IMAGE_NAME: trackerr-api
+        PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_email: ${{ secrets.GCP_EMAIL }}
+          service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+          export_default_credentials: true
+
+      - name: Execute secret values
+        run: |
+          rm config.env
+          echo "DB_DRIVER=$(gcloud secrets versions access latest --quiet --secret=DB_DRIVER)"  >> config.env
+          echo "DB_SOURCE=$(gcloud secrets versions access latest --quiet --secret=DB_SOURCE)" >> config.env
+          echo "ACCESS_TOKEN_DURATION=$(gcloud secrets versions access latest --quiet --secret=ACCESS_TOKEN_DURATION)" >> config.env
+          echo "TOKEN_SYMMETRIC_KEY=$(gcloud secrets versions access latest --quiet --secret=TOKEN_SYMMETRIC_KEY)" >> config.env
+          echo "SERVER_ADDRESS=$(gcloud secrets versions access latest --quiet --secret=SERVER_ADDRESS)" >> config.env
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
+      - name: Automatic Tagging of Releases
+        id: increment-git-tag
+        run: |
+          bash ./scripts/git_update.sh -v patch
+
+      - name: Configure Docker Client
+        run: |-
+          gcloud auth configure-docker --quiet
+          gcloud auth configure-docker asia-southeast2-docker.pkg.dev --quiet
+
+      - name: Push Docker Image to Artifact Registry
+        env:
+          GIT_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+        run: |-
+          docker build -t $IMAGE_NAME:latest .
+          docker tag $IMAGE_NAME:latest asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:latest
+          docker tag $IMAGE_NAME:latest asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:$GIT_TAG
+          docker push asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:latest
+          docker push asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:$GIT_TAG
+          
+      - name: Deploy to Cloud Run
+        id: deploy
+        run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image asia-southeast2-docker.pkg.dev/$PROJECT_ID/images/$IMAGE_NAME:latest --region asia-southeast2 --platform managed --
+
+        # If required, use the Cloud Run url output in later steps
+      - name: Show Output
+        run: echo ${{ steps.deploy.outputs.url }}
