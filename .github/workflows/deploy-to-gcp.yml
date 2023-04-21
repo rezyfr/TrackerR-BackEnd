@@ -26,7 +26,11 @@ jobs:
         run: |
           rm config.env
           echo "DB_DRIVER=$(gcloud secrets versions access latest --quiet --secret=DB_DRIVER)"  >> config.env
-          echo "DB_SOURCE=$(gcloud secrets versions access latest --quiet --secret=DB_SOURCE)" >> config.env
+          echo "DB_USER=$(gcloud secrets versions access latest --quiet --secret=DB_USER)" >> config.env
+          echo "DB_PASSWORD=$(gcloud secrets versions access latest --quiet --secret=DB_PASSWORD)" >> config.env
+          echo "DB_NAME=$(gcloud secrets versions access latest --quiet --secret=DB_NAME)" >> config.env
+          echo "DB_HOST=$(gcloud secrets versions access latest --quiet --secret=DB_HOST)" >> config.env
+          echo "DB_PORT=5432" >> config.env
           echo "ACCESS_TOKEN_DURATION=$(gcloud secrets versions access latest --quiet --secret=ACCESS_TOKEN_DURATION)" >> config.env
           echo "TOKEN_SYMMETRIC_KEY=$(gcloud secrets versions access latest --quiet --secret=TOKEN_SYMMETRIC_KEY)" >> config.env
           echo "SERVER_ADDRESS=$(gcloud secrets versions access latest --quiet --secret=SERVER_ADDRESS)" >> config.env
