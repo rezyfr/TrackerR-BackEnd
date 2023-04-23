@@ -34,6 +34,7 @@ jobs:
           echo "ACCESS_TOKEN_DURATION=$(gcloud secrets versions access latest --quiet --secret=ACCESS_TOKEN_DURATION)" >> config.env
           echo "TOKEN_SYMMETRIC_KEY=$(gcloud secrets versions access latest --quiet --secret=TOKEN_SYMMETRIC_KEY)" >> config.env
           echo "SERVER_ADDRESS=$(gcloud secrets versions access latest --quiet --secret=SERVER_ADDRESS)" >> config.env
+          echo "MIGRATION_URL=file://db/migration" >> config.env
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
