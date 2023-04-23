@@ -16,6 +16,7 @@ type Config struct {
 	DBName              string        `mapstructure:"DB_NAME"`
 	DBPort              string        `mapstructure:"DB_PORT"`
 	DBHost              string        `mapstructure:"DB_HOST"`
+	MigrationURL        string        `mapstructure:"MIGRATION_URL"`
 	ServerAddress       string        `mapstructure:"SERVER_ADDRESS"`
 	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
