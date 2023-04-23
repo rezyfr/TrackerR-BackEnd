@@ -50,6 +50,7 @@ func runDbMigration(migrationURL string, dbSource string) {
 	migration, err := migrate.New(migrationURL, dbSource)
 	if err != nil {
 		log.Println(dbSource)
+		log.Println("migUrl: " + migrationURL)
 		log.Fatal("cannot create migration: ", err)
 	}
 
