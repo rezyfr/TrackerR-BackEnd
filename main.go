@@ -26,13 +26,13 @@ func main() {
 		log.Fatal("cannot connect to db: ", err)
 	}
 
-	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
-		config.DBUser,
-		config.DBPassword,
-		config.DBHost,
-		config.DBPort,
-		config.DBName)
-	runDbMigration(config.MigrationURL, url)
+	//url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
+	//	config.DBUser,
+	//	config.DBPassword,
+	//	config.DBHost,
+	//	config.DBPort,
+	//	config.DBName)
+	//runDbMigration(config.MigrationURL, url)
 
 	store := db.NewStore(conn)
 	server, err := api.NewServer(config, store)
