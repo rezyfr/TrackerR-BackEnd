@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
@@ -26,13 +27,13 @@ func main() {
 		log.Fatal("cannot connect to db: ", err)
 	}
 
-	//url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
-	//	config.DBUser,
-	//	config.DBPassword,
-	//	config.DBHost,
-	//	config.DBPort,
-	//	config.DBName)
-	//runDbMigration(config.MigrationURL, url)
+	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
+		config.DBUser,
+		config.DBPassword,
+		config.DBHost,
+		config.DBPort,
+		config.DBName)
+	runDbMigration(config.MigrationURL, url)
 
 	store := db.NewStore(conn)
 	server, err := api.NewServer(config, store)
