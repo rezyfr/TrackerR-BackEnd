@@ -27,7 +27,8 @@ func main() {
 		log.Fatal("cannot connect to db: ", err)
 	}
 
-	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
+	url := fmt.Sprintf("%v://%v:%v@%v:%v/%v",
+		config.DBDriver,
 		config.DBUser,
 		config.DBPassword,
 		config.DBHost,
