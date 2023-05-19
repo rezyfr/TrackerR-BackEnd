@@ -22,6 +22,7 @@ func main() {
 
 	var dbURI string
 	dbURI = fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s sslmode=disable", config.DBHost, config.DBUser, config.DBPassword, config.DBPort, config.DBName)
+	log.Println("dbUri: " + dbURI)
 	conn, err := sql.Open(config.DBDriver, dbURI)
 	if err != nil {
 		log.Fatal("cannot connect to db: ", err)
