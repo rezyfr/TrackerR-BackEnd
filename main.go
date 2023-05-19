@@ -8,10 +8,9 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
-	"github.com/rezyfr/Trackerr-BackEnd/api"
-	db "github.com/rezyfr/Trackerr-BackEnd/db/sqlc"
 	"github.com/rezyfr/Trackerr-BackEnd/util"
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -23,29 +22,49 @@ func main() {
 	var dbURI string
 	dbURI = fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s sslmode=disable", config.DBHost, config.DBUser, config.DBPassword, config.DBPort, config.DBName)
 	log.Println("dbUri: " + dbURI)
+
 	conn, err := sql.Open(config.DBDriver, dbURI)
 	if err != nil {
 		log.Fatal("cannot connect to db: ", err)
 	}
 
-	url := fmt.Sprintf("%v://%v:%v@%v:%v/%v",
-		config.DBDriver,
-		config.DBUser,
-		config.DBPassword,
-		config.DBHost,
-		config.DBPort,
-		config.DBName)
-	runDbMigration(config.MigrationURL, url)
+	//url := fmt.Sprintf("%v://%v:%v@%v:%v/%v",
+	//	config.DBDriver,
+	//	config.DBUser,
+	//	config.DBPassword,
+	//	config.DBHost,
+	//	config.DBPort,
+	//	config.DBName)
+	//runDbMigration(config.MigrationURL, url)
 
-	store := db.NewStore(conn)
-	server, err := api.NewServer(config, store)
-	if err != nil {
-		log.Fatal("cannot create server: ", err)
-	}
+	http.HandleFunc("/", handler(conn))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 
-	err = server.Start(config.ServerAddress)
-	if err != nil {
-		log.Fatal("cannot start server: ", err)
+	//store := db.NewStore(conn)
+	//server, err := api.NewServer(config, store)
+	//if err != nil {
+	//	log.Fatal("cannot create server: ", err)
+	//}
+	//
+	//err = server.Start(config.ServerAddress)
+	//if err != nil {
+	//	log.Fatal("cannot start server: ", err)
+	//}
+}
+
+func handler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := db.Ping()
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("error while trying to connect to database"))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ping success to database"))
+		log.Println("ping success")
 	}
 }
 
