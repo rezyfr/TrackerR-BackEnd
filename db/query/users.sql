@@ -11,6 +11,9 @@ INSERT INTO users (
 SELECT * FROM users
 WHERE id = $1 LIMIT 1;
 
+-- name: GetRecentUsers :many
+SELECT * FROM users LIMIT 5;
+
 -- name: GetUserByEmail :one
 SELECT * FROM users
 WHERE email = $1 LIMIT 1;
